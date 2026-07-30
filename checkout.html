@@ -101,7 +101,7 @@
   <script>
     const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? '/api'
-      : 'https://the-yusuf-store.onrender.com/api';
+      : 'https://your-project-name.vercel.app/api';
 
     function loadCartForCheckout() {
       const items = JSON.parse(localStorage.getItem('cart') || '[]');
