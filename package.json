@@ -1,7 +1,7 @@
 {
   "name": "the-yusuf-store",
   "version": "1.0.0",
-  "description": "The Yusuf Store - Online Store with WhatsApp 2FA Checkout",
+  "description": "The Yusuf Store - Online Store with Email Order Confirmation",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -23,6 +23,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "nodemailer": "^9.0.3",
     "twilio": "^6.0.2"
   }
 }

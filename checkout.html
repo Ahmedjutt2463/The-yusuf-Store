@@ -30,63 +30,40 @@
     <div class="checkout-container">
       <a href="javascript:history.back()" class="back-link">&larr; Back</a>
       <h1 class="section-title">Checkout</h1>
+      <p class="section-sub">Review your order and fill in your details.</p>
 
-      <div id="checkoutStep1">
-        <p class="section-sub">Review your order and enter your details.</p>
+      <div id="checkoutItems" class="checkout-items"></div>
 
-        <div id="checkoutItems" class="checkout-items"></div>
-
-        <form id="checkoutForm">
-          <div class="checkout-form">
-            <div class="form-group">
-              <label for="name">Full Name</label>
-              <input type="text" id="name" placeholder="Enter your full name" required>
-            </div>
-            <div class="form-group">
-              <label for="phone">Phone Number (with country code, e.g. +923001234567)</label>
-              <input type="tel" id="phone" placeholder="+92 300 1234567" required>
-            </div>
-            <div class="form-group">
-              <label for="address">Complete Address</label>
-              <textarea id="address" rows="3" placeholder="House / Street / City / Province" required></textarea>
-            </div>
+      <form id="checkoutForm">
+        <div class="checkout-form">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="Enter your full name" required>
           </div>
-          <div class="checkout-total-bar">
-            <span>Total: <strong id="checkoutTotal">Rs. 0</strong></span>
-            <button type="submit" class="btn btn-primary" id="placeOrderBtn">Place Order</button>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="your@email.com" required>
           </div>
-        </form>
-      </div>
-
-      <div id="checkoutStep2" style="display:none">
-        <div class="verify-box">
-          <div class="verify-icon">&#9993;</div>
-          <h2>Verify Your Order</h2>
-          <p id="verifyPhoneMsg">We've sent a verification code via WhatsApp to your number.</p>
-          <p class="verify-hint">Enter the 4-digit code below to confirm your order.</p>
-          <div class="code-inputs">
-            <input type="text" maxlength="1" class="code-input" data-index="0">
-            <input type="text" maxlength="1" class="code-input" data-index="1">
-            <input type="text" maxlength="1" class="code-input" data-index="2">
-            <input type="text" maxlength="1" class="code-input" data-index="3">
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" placeholder="+92 300 1234567" required>
           </div>
-          <div id="verifyError" class="verify-error" style="display:none"></div>
-          <button class="btn btn-primary" id="verifyBtn">Confirm Order</button>
-          <p class="verify-resend">
-            Didn't receive the code?
-            <a href="#" id="resendCode">Resend</a>
-          </p>
-          <p class="verify-whatsapp-link" id="whatsappFallback" style="display:none">
-            <a href="#" id="whatsappLink" target="_blank">Click here to send code via WhatsApp</a>
-          </p>
+          <div class="form-group">
+            <label for="address">Complete Address</label>
+            <textarea id="address" rows="3" placeholder="House / Street / City / Province" required></textarea>
+          </div>
         </div>
-      </div>
+        <div class="checkout-total-bar">
+          <span>Total: <strong id="checkoutTotal">Rs. 0</strong></span>
+          <button type="submit" class="btn btn-primary" id="placeOrderBtn">Place Order</button>
+        </div>
+      </form>
 
-      <div id="checkoutStep3" style="display:none">
+      <div id="checkoutSuccess" style="display:none">
         <div class="success-box">
           <div class="success-icon">&#10003;</div>
           <h2>Order Confirmed!</h2>
-          <p>Thank you for your order. We will contact you shortly to confirm delivery details.</p>
+          <p>A confirmation email has been sent to your email address.</p>
           <div class="order-details" id="orderDetails"></div>
           <a href="index.html" class="btn btn-primary">Continue Shopping</a>
         </div>
@@ -122,10 +99,6 @@
 
   <script src="script.js"></script>
   <script>
-    let currentOrderId = null;
-    let currentCode = null;
-    let whatsappUrl = null;
-
     function loadCartForCheckout() {
       const items = JSON.parse(localStorage.getItem('cart') || '[]');
       const container = document.getElementById('checkoutItems');
@@ -156,6 +129,7 @@
     document.getElementById('checkoutForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
       const phone = document.getElementById('phone').value.trim();
       const address = document.getElementById('address').value.trim();
       const items = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -167,14 +141,14 @@
       }
 
       const btn = document.getElementById('placeOrderBtn');
-      btn.textContent = 'Sending...';
+      btn.textContent = 'Placing Order...';
       btn.disabled = true;
 
       try {
-        const res = await fetch('/api/send-code', {
+        const res = await fetch('/api/place-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, phone, address, items, total })
+          body: JSON.stringify({ name, email, phone, address, items, total })
         });
 
         const data = await res.json();
@@ -186,78 +160,14 @@
           return;
         }
 
-        currentOrderId = data.orderId;
-        currentCode = data.code;
-        whatsappUrl = data.whatsappUrl;
-
-        document.getElementById('checkoutStep1').style.display = 'none';
-        document.getElementById('checkoutStep2').style.display = 'block';
-
-        const phoneDisplay = document.getElementById('verifyPhoneMsg');
-        phoneDisplay.textContent = data.message;
-
-        if (!data.code) {
-          document.getElementById('whatsappFallback').style.display = 'none';
-        } else {
-          document.getElementById('whatsappFallback').style.display = 'block';
-          document.getElementById('whatsappLink').href = whatsappUrl;
-        }
-      } catch (err) {
-        showToast('Could not connect to server. Make sure the server is running.');
-        btn.textContent = 'Place Order';
-        btn.disabled = false;
-      }
-    });
-
-    document.querySelectorAll('.code-input').forEach((input, idx, arr) => {
-      input.addEventListener('input', function () {
-        this.value = this.value.replace(/[^0-9]/g, '');
-        if (this.value && idx < arr.length - 1) arr[idx + 1].focus();
-      });
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Backspace' && !this.value && idx > 0) arr[idx - 1].focus();
-      });
-    });
-
-    document.getElementById('verifyBtn').addEventListener('click', async function () {
-      const digits = [];
-      document.querySelectorAll('.code-input').forEach(i => digits.push(i.value));
-      const code = digits.join('');
-      const errorEl = document.getElementById('verifyError');
-
-      if (code.length !== 4) {
-        errorEl.textContent = 'Please enter the full 4-digit code.';
-        errorEl.style.display = 'block';
-        return;
-      }
-
-      this.textContent = 'Verifying...';
-      this.disabled = true;
-
-      try {
-        const res = await fetch('/api/verify-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: currentOrderId, code })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          errorEl.textContent = data.error || 'Verification failed';
-          errorEl.style.display = 'block';
-          this.textContent = 'Confirm Order';
-          this.disabled = false;
-          return;
-        }
-
-        document.getElementById('checkoutStep2').style.display = 'none';
-        document.getElementById('checkoutStep3').style.display = 'block';
+        document.getElementById('checkoutForm').style.display = 'none';
+        document.getElementById('checkoutSuccess').style.display = 'block';
 
         const order = data.order;
         document.getElementById('orderDetails').innerHTML = `
           <p><strong>Order ID:</strong> ${order.id}</p>
           <p><strong>Name:</strong> ${order.name}</p>
+          <p><strong>Email:</strong> ${order.email}</p>
           <p><strong>Phone:</strong> ${order.phone}</p>
           <p><strong>Address:</strong> ${order.address}</p>
           <p><strong>Total:</strong> Rs. ${order.total.toLocaleString()}</p>
@@ -267,20 +177,9 @@
         cart.items = [];
         cart.updateBadge();
       } catch (err) {
-        errorEl.textContent = 'Could not connect to server.';
-        errorEl.style.display = 'block';
-        this.textContent = 'Confirm Order';
-        this.disabled = false;
-      }
-    });
-
-    document.getElementById('resendCode').addEventListener('click', function (e) {
-      e.preventDefault();
-      if (whatsappUrl) {
-        window.open(whatsappUrl, '_blank');
-        showToast('WhatsApp opened. Please send the code to verify.');
-      } else {
-        showToast('Please check your WhatsApp for the code.');
+        showToast('Could not connect to server. Make sure the server is running.');
+        btn.textContent = 'Place Order';
+        btn.disabled = false;
       }
     });
 
