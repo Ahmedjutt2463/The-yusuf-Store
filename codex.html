@@ -32,14 +32,14 @@
       <div class="detail-layout">
         <div class="detail-gallery">
           <div class="main-image">
-            <img src="images/P1.1.jpeg" alt="CODE X" id="mainImg">
-            <video src="images/PV1.mp4" controls playsinline id="mainVideo" style="display:none"></video>
+            <img src="images/P1.1.jpeg" alt="CODE X" id="mainImg" style="display:none">
+            <video src="images/PV1.mp4" controls playsinline id="mainVideo" autoplay onended="document.getElementById('mainVideo').style.display='none';document.getElementById('mainImg').style.display='block';document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));document.querySelector('.thumb:not(.thumb-video)').classList.add('active')"></video>
           </div>
           <div class="thumbnails">
-            <img src="images/P1.1.jpeg" alt="CODE X 1" class="thumb active" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainVideo').pause();document.getElementById('mainImg').style.display='block'">
+            <img src="images/P1.1.jpeg" alt="CODE X 1" class="thumb" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainVideo').pause();document.getElementById('mainImg').style.display='block'">
             <img src="images/P1.2.jpeg" alt="CODE X 2" class="thumb" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainVideo').pause();document.getElementById('mainImg').style.display='block'">
             <img src="images/P1.3.jpeg" alt="CODE X 3" class="thumb" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainVideo').pause();document.getElementById('mainImg').style.display='block'">
-            <div class="thumb thumb-video" onclick="document.getElementById('mainImg').style.display='none';document.getElementById('mainVideo').style.display='block';document.getElementById('mainVideo').play();document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));this.classList.add('active')">
+            <div class="thumb thumb-video active" onclick="document.getElementById('mainImg').style.display='none';document.getElementById('mainVideo').style.display='block';document.getElementById('mainVideo').play();document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));this.classList.add('active')">
               <span class="thumb-play-icon">&#9654;</span>
               <video src="images/PV1.mp4" muted preload="metadata"></video>
             </div>
