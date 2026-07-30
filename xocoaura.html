@@ -33,18 +33,16 @@
         <div class="detail-gallery">
           <div class="main-image">
             <img src="images/P2.1.jpeg" alt="Xoco Aura" id="mainImg">
+            <video src="images/PV2.mp4" controls playsinline id="mainVideo" style="display:none"></video>
           </div>
           <div class="thumbnails">
-            <img src="images/P2.1.jpeg" alt="Xoco Aura 1" class="thumb active" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainImg').style.display='block'">
-            <img src="images/P2.2.jpeg" alt="Xoco Aura 2" class="thumb" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainImg').style.display='block'">
-            <img src="images/P2.3.jpeg" alt="Xoco Aura 3" class="thumb" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainImg').style.display='block'">
+            <img src="images/P2.1.jpeg" alt="Xoco Aura 1" class="thumb active" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainVideo').pause();document.getElementById('mainImg').style.display='block'">
+            <img src="images/P2.2.jpeg" alt="Xoco Aura 2" class="thumb" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainVideo').pause();document.getElementById('mainImg').style.display='block'">
+            <img src="images/P2.3.jpeg" alt="Xoco Aura 3" class="thumb" onclick="document.getElementById('mainImg').src=this.src;this.classList.add('active');document.querySelectorAll('.thumb:not(.thumb-video)').forEach(t=>{if(t!==this)t.classList.remove('active')});document.getElementById('mainVideo').style.display='none';document.getElementById('mainVideo').pause();document.getElementById('mainImg').style.display='block'">
             <div class="thumb thumb-video" onclick="document.getElementById('mainImg').style.display='none';document.getElementById('mainVideo').style.display='block';document.getElementById('mainVideo').play();document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));this.classList.add('active')">
               <span class="thumb-play-icon">&#9654;</span>
               <video src="images/PV2.mp4" muted preload="metadata"></video>
             </div>
-          </div>
-          <div class="main-video" id="mainVideo" style="display:none">
-            <video src="images/PV2.mp4" controls playsinline></video>
           </div>
         </div>
         <div class="detail-info">

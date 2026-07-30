@@ -626,13 +626,21 @@ h1, h2, h3, h4, .logo, .hero h1, .page-hero h1, .detail-info h1 {
   margin-bottom: 0.8rem;
   border: 1px solid var(--border);
   transition: border-color 0.3s ease;
+  position: relative;
 }
 
-.main-image img {
+.main-image img,
+.main-image video {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: opacity 0.3s ease;
+  display: block;
+}
+
+.main-image video {
+  object-fit: contain;
+  background: #000;
 }
 
 .thumbnails {
@@ -695,22 +703,6 @@ h1, h2, h3, h4, .logo, .hero h1, .page-hero h1, .detail-info h1 {
 
 .thumb-video.active .thumb-play-icon {
   background: var(--gold);
-}
-
-.main-video {
-  width: 100%;
-  aspect-ratio: 1;
-  overflow: hidden;
-  background: #000;
-  margin-bottom: 0.8rem;
-  border: 1px solid var(--border);
-}
-
-.main-video video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
 }
 
 .detail-info {
@@ -1230,7 +1222,7 @@ footer {
     height: 55px;
   }
 
-  .main-video {
+  .main-image {
     aspect-ratio: 4 / 3;
   }
 
