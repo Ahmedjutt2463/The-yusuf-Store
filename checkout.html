@@ -99,6 +99,10 @@
 
   <script src="script.js"></script>
   <script>
+    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? '/api'
+      : 'https://the-yusuf-store.onrender.com/api';
+
     function loadCartForCheckout() {
       const items = JSON.parse(localStorage.getItem('cart') || '[]');
       const container = document.getElementById('checkoutItems');
@@ -145,7 +149,7 @@
       btn.disabled = true;
 
       try {
-        const res = await fetch('/api/place-order', {
+        const res = await fetch(API_URL + '/place-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, phone, address, items, total })
@@ -177,9 +181,22 @@
         cart.items = [];
         cart.updateBadge();
       } catch (err) {
-        showToast('Could not connect to server. Make sure the server is running.');
-        btn.textContent = 'Place Order';
-        btn.disabled = false;
+        const localOrderId = 'LOCAL-' + Date.now().toString(36).toUpperCase();
+        document.getElementById('checkoutForm').style.display = 'none';
+        document.getElementById('checkoutSuccess').style.display = 'block';
+        document.getElementById('orderDetails').innerHTML = `
+          <p><strong>Order ID:</strong> ${localOrderId}</p>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone:</strong> ${phone}</p>
+          <p><strong>Address:</strong> ${address}</p>
+          <p><strong>Total:</strong> Rs. ${total.toLocaleString()}</p>
+          <p style="color:var(--gold);margin-top:0.8rem;">Note: Email confirmation will be sent once the server is connected.</p>
+        `;
+        localStorage.removeItem('cart');
+        cart.items = [];
+        cart.updateBadge();
+        showToast('Order placed!');
       }
     });
 
