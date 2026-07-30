@@ -263,6 +263,21 @@ document.querySelectorAll('.add-to-cart').forEach(btn => {
   });
 });
 
+function playVideo(el) {
+  const video = el.querySelector('video');
+  if (!video) return;
+  video.controls = true;
+  video.play();
+  el.querySelector('.play-icon')?.remove();
+}
+
+document.querySelectorAll('.product-video-thumb').forEach(el => {
+  el.addEventListener('click', function (e) {
+    e.preventDefault();
+    playVideo(this);
+  });
+});
+
 document.getElementById('contactForm')?.addEventListener('submit', function (e) {
   e.preventDefault();
   showToast('Thank you! We will get back to you soon.');
