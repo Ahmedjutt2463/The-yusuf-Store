@@ -99,8 +99,9 @@ module.exports = async (req, res) => {
           <p style="font-size:14px;color:#5a4a3a;margin:0 0 4px;line-height:1.5;">${address.replace(/\n/g, '<br>')}</p>
           <p style="font-size:14px;color:#5a4a3a;margin:0 0 20px;">Phone: ${phone}</p>
 
+          <p style="font-size:14px;color:#5a4a3a;margin:0 0 4px;line-height:1.6;">Thank you for shopping with us! We truly appreciate your trust.</p>
           <p style="font-size:14px;color:#5a4a3a;margin:0 0 4px;line-height:1.6;">You will receive a notification once your order is shipped.</p>
-          <p style="font-size:14px;color:#5a4a3a;margin:0 0 20px;line-height:1.6;">If you have any questions, reply to this email or contact us at <a href="mailto:info@scentsbyyusuf.com" style="color:#c9a84c;text-decoration:none;">info@scentsbyyusuf.com</a>.</p>
+          <p style="font-size:14px;color:#5a4a3a;margin:0 0 20px;line-height:1.6;">For further queries, contact us at <strong>0336-8877666</strong> or email <a href="mailto:info@scentsbyyusuf.com" style="color:#c9a84c;text-decoration:none;">info@scentsbyyusuf.com</a>.</p>
         </td></tr>
         <tr>
           <td style="background:#1a1a2e;padding:20px 40px;text-align:center;">
