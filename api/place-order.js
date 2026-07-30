@@ -76,7 +76,7 @@ Contact: ${phone}
 
 We will notify you once your order is shipped.
 
-If you have any questions, reply to this email or contact us at info@theyusufstore.com.
+If you have any questions, reply to this email or contact us at info@scentsbyyusuf.com.
 
 Best regards,
 The Yusuf Store`;

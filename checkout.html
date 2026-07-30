@@ -88,7 +88,7 @@
       </div>
       <div class="footer-contact">
         <h4>Contact</h4>
-        <p>Email: info@theyusufstore.com</p>
+        <p>Email: info@scentsbyyusuf.com</p>
         <p>Phone: +1 234 567 890</p>
       </div>
     </div>
@@ -99,9 +99,7 @@
 
   <script src="script.js"></script>
   <script>
-    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? '/api'
-      : 'https://the-yusuf-store.vercel.app/api';
+    const API_URL = '/api';
 
     function loadCartForCheckout() {
       const items = JSON.parse(localStorage.getItem('cart') || '[]');
