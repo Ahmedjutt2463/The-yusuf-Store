@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CODE X - The Yusuf Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">The Yusuf Store</div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="collection.html">Collection</a></li>
+        <li><a href="index.html#gallery">Gallery</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+      <button class="hamburger" aria-label="Menu">&#9776;</button>
+    </nav>
+  </header>
+
+  <section class="product-detail">
+    <div class="detail-container">
+      <a href="perfumes.html" class="back-link">&larr; Back to Perfumes</a>
+      <div class="detail-layout">
+        <div class="detail-gallery">
+          <div class="main-image">
+            <img src="images/P1.1.jpeg" alt="CODE X" id="mainImg">
+          </div>
+          <div class="thumbnails">
+            <img src="images/P1.1.jpeg" alt="CODE X 1" class="thumb active" onclick="document.getElementById('mainImg').src=this.src;document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));this.classList.add('active')">
+            <img src="images/P1.2.jpeg" alt="CODE X 2" class="thumb" onclick="document.getElementById('mainImg').src=this.src;document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));this.classList.add('active')">
+            <img src="images/P1.3.jpeg" alt="CODE X 3" class="thumb" onclick="document.getElementById('mainImg').src=this.src;document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));this.classList.add('active')">
+          </div>
+        </div>
+        <div class="detail-info">
+          <span class="discount-badge">50% OFF</span>
+          <h1>CODE X</h1>
+          <p class="product-for">For Men</p>
+          <div class="price">
+            <span class="original">Rs. 1,999</span>
+            <span class="sale">Rs. 999</span>
+          </div>
+          <div class="divider"></div>
+          <p class="detail-desc">Inspired by the iconic Creed Aventus, CODE X opens with bright pineapple and bergamot, leading to a heart of birch and jasmine on a base of oakmoss, musk, and vanilla. A bold, long-lasting statement.</p>
+          <div class="detail-features">
+            <div class="feature-item">
+              <span class="feature-icon">&#10003;</span>
+              <span>99% similar to Creed Aventus</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">&#10003;</span>
+              <span>Long-lasting 8+ hours</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">&#10003;</span>
+              <span>Premium imported ingredients</span>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="size-selector">
+            <label>Size</label>
+            <div class="size-options">
+              <span class="size-option" data-size="30" data-original="1499" data-sale="699" data-stock="out">30ml <span class="stock-status">out of stock</span></span>
+              <span class="size-option active" data-size="50" data-original="1999" data-sale="999" data-stock="in">50ml</span>
+              <span class="size-option" data-size="100" data-original="2499" data-sale="1399" data-stock="out">100ml <span class="stock-status">out of stock</span></span>
+            </div>
+          </div>
+          <div class="quantity-selector">
+            <label>Quantity</label>
+            <div class="quantity-controls">
+              <button class="qty-btn" onclick="if(this.nextElementSibling.value>1)this.nextElementSibling.value--">-</button>
+              <input type="number" value="1" min="1" max="10" readonly>
+              <button class="qty-btn" onclick="this.previousElementSibling.value++">+</button>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn btn-primary add-to-cart" data-product="CODE X">Add to Cart</button>
+            <button class="btn btn-buy">Buy Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>The Yusuf Store</h3>
+        <p>Premium perfumes, watches & grooming essentials.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="collection.html">Collection</a></li>
+          <li><a href="index.html#gallery">Gallery</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <h4>Contact</h4>
+        <p>Email: info@theyusufstore.com</p>
+        <p>Phone: +1 234 567 890</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 The Yusuf Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
