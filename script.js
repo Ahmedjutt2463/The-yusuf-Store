@@ -173,8 +173,7 @@ function injectCartUI() {
   document.getElementById('checkoutBtn').addEventListener('click', () => {
     if (cart.items.length === 0) return;
     closeCart();
-    showToast('Order placed! We will contact you soon.');
-    cart.clear();
+    window.location.href = 'checkout.html';
   });
 }
 
