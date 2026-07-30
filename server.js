@@ -9,8 +9,8 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
+  host: process.env.SMTP_HOST || 'smtpout.secureserver.net',
+  port: parseInt(process.env.SMTP_PORT || '465'),
   secure: process.env.SMTP_SECURE === 'true',
   auth: {
     user: process.env.SMTP_USER,
