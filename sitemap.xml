@@ -16,6 +16,16 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.scentsbyyusuf.com/derma.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scentsbyyusuf.com/skincare.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.scentsbyyusuf.com/codex.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -27,6 +37,36 @@
   </url>
   <url>
     <loc>https://www.scentsbyyusuf.com/sweethead.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.scentsbyyusuf.com/hair-revive-gel.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.scentsbyyusuf.com/ovasetal.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.scentsbyyusuf.com/diab-cure.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.scentsbyyusuf.com/testim.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.scentsbyyusuf.com/gloid.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.scentsbyyusuf.com/lypospheric-c.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -243,7 +243,7 @@ document.querySelectorAll('.add-to-cart').forEach(btn => {
         showToast('This size is out of stock.');
         return;
       }
-      const size = activeSize.dataset.size + 'ml';
+      const size = activeSize.dataset.label || (activeSize.dataset.size + 'ml');
       const price = parseInt(activeSize.dataset.sale);
       const qty = parseInt(detailPage.querySelector('.quantity-controls input').value) || 1;
       const img = document.querySelector('.main-image img')?.src || '';
@@ -256,8 +256,20 @@ document.querySelectorAll('.add-to-cart').forEach(btn => {
       const price = priceEl ? parseInt(priceEl.textContent.replace(/[^0-9]/g, '')) : 0;
       const img = this.closest('.product-card')?.querySelector('.product-img img')?.src || '';
       const card = this.closest('.product-card');
-      const size = card?.querySelector('.size-option.active')?.dataset.size + 'ml' || '50ml';
-      cart.add({ id, name, size: '50ml', price, quantity: 1, image: img });
+      const size = this.dataset.size || '50ml';
+      cart.add({ id, name, size, price, quantity: 1, image: img });
+    }
+  });
+});
+
+document.querySelectorAll('.btn-buy').forEach(btn => {
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    const detailPage = this.closest('.detail-info');
+    const addBtn = detailPage?.querySelector('.add-to-cart');
+    if (addBtn) {
+      addBtn.click();
+      setTimeout(() => window.location.href = 'checkout.html', 400);
     }
   });
 });
