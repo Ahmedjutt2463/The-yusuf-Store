@@ -289,10 +289,33 @@ document.querySelectorAll('.product-video-thumb').forEach(el => {
   });
 });
 
-document.getElementById('contactForm')?.addEventListener('submit', function (e) {
+document.getElementById('contactForm')?.addEventListener('submit', async function (e) {
   e.preventDefault();
-  showToast('Thank you! We will get back to you soon.');
-  this.reset();
+  const btn = document.getElementById('contactSendBtn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  const payload = {
+    name: document.getElementById('contactName').value.trim(),
+    email: document.getElementById('contactEmail').value.trim(),
+    subject: document.getElementById('contactSubject').value.trim(),
+    message: document.getElementById('contactMessage').value.trim()
+  };
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to send');
+    showToast('Thank you! Your message has been sent.');
+    this.reset();
+  } catch (err) {
+    showToast('Sorry, message could not be sent. Please email info@scentsbyyusuf.com');
+  } finally {
+    btn.textContent = 'Send Message';
+    btn.disabled = false;
+  }
 });
 
 const backToTop = document.createElement('button');
