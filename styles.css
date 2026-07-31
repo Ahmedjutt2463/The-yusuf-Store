@@ -900,14 +900,21 @@ h1, h2, h3, h4, .logo, .hero h1, .page-hero h1, .detail-info h1 {
 }
 
 .btn-buy {
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--border-light);
+  padding: 0.7rem 1.5rem;
+  background: var(--gold);
+  color: #fff;
+  border: none;
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
 }
 
 .btn-buy:hover {
-  background: var(--text);
-  color: var(--bg);
+  background: #1a1a2e;
+  color: #fff;
 }
 
 .gallery {
