@@ -160,12 +160,16 @@ The Yusuf Store`;
         <tr><td style="padding:35px 40px 20px;">
           <p style="font-size:16px;color:#3a2a1a;margin:0 0 20px;">A new order has been placed on <strong>The Yusuf Store</strong>. Please review the details below and dispatch the order or contact the customer for confirmation.</p>
 
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6f0;border-radius:6px;padding:18px 20px;margin-bottom:24px;">
-            <tr><td style="font-size:13px;color:#8a7a6a;padding:3px 0;">Order ID</td><td style="font-size:14px;color:#1a1a2e;font-weight:700;text-align:right;padding:3px 0;">${orderId}</td></tr>
-            <tr><td style="font-size:13px;color:#8a7a6a;padding:3px 0;">Date</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:3px 0;">${order.date}</td></tr>
-            <tr><td style="font-size:13px;color:#8a7a6a;padding:3px 0;">Customer</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:3px 0;">${name}</td></tr>
-            <tr><td style="font-size:13px;color:#8a7a6a;padding:3px 0;">Phone</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:3px 0;">${phone}</td></tr>
-            <tr><td style="font-size:13px;color:#8a7a6a;padding:3px 0;">Email</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:3px 0;">${email}</td></tr>
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6f0;border-radius:6px;padding:18px 20px;margin-bottom:24px;border:2px solid #c9a84c;">
+            <tr>
+              <td colspan="2" style="font-size:14px;color:#1a1a2e;font-weight:700;letter-spacing:1px;padding:0 0 10px;border-bottom:1px solid #e8e0d0;">&#128666; CUSTOMER &amp; SHIPPING DETAILS</td>
+            </tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:8px 0 2px;">Customer Name</td><td style="font-size:15px;color:#1a1a2e;font-weight:700;text-align:right;padding:8px 0 2px;">${name}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Phone</td><td style="font-size:15px;color:#1a1a2e;font-weight:600;text-align:right;padding:2px 0;"><a href="tel:${phone}" style="color:#1a1a2e;text-decoration:none;">${phone}</a></td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Email</td><td style="font-size:14px;color:#1a1a2e;text-align:right;padding:2px 0;"><a href="mailto:${email}" style="color:#1a1a2e;">${email}</a></td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Full Address</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:2px 0;">${address.replace(/\n/g, '<br>')}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:8px 0 2px;border-top:1px solid #e8e0d0;">Order ID</td><td style="font-size:14px;color:#1a1a2e;font-weight:700;text-align:right;padding:8px 0 2px;border-top:1px solid #e8e0d0;">${orderId}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Date</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:2px 0;">${order.date}</td></tr>
           </table>
 
           <h3 style="color:#1a1a2e;font-size:16px;margin:0 0 10px;">Order Items</h3>
@@ -185,11 +189,6 @@ The Yusuf Store`;
               <td style="font-size:18px;color:#c9a84c;font-weight:700;text-align:right;padding:8px 12px;">Rs. ${total.toLocaleString()}</td>
             </tr>
           </table>
-
-          <div style="border-top:1px solid #e8e0d0;margin:24px 0 18px;"></div>
-
-          <h3 style="color:#1a1a2e;font-size:15px;margin:0 0 8px;">Delivery Address</h3>
-          <p style="font-size:14px;color:#5a4a3a;margin:0;line-height:1.5;">${address.replace(/\n/g, '<br>')}</p>
         </td></tr>
       </table>
     </td></tr>
