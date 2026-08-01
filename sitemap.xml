@@ -26,6 +26,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.scentsbyyusuf.com/nutrition.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.scentsbyyusuf.com/codex.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -67,6 +72,11 @@
   </url>
   <url>
     <loc>https://www.scentsbyyusuf.com/lypospheric-c.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.scentsbyyusuf.com/bio-oatmeal.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
