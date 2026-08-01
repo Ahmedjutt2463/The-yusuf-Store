@@ -1,5 +1,6 @@
 require('dotenv').config();
 const nodemailer = require('nodemailer');
+const { getSupabase } = require('./_lib/supabase');
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtpout.secureserver.net',
@@ -72,6 +73,26 @@ module.exports = async (req, res) => {
     date: new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' }),
     status: 'confirmed'
   };
+
+  const sb = getSupabase();
+  if (sb) {
+    try {
+      const { error: dbError } = await sb.from('orders').insert({
+        order_id: orderId,
+        name, email, phone, address,
+        items: items,
+        total: Number(total),
+        status: 'confirmed',
+        ip: order.ip,
+        location: locationInfo,
+        device: device || null,
+        gps: gps || null
+      });
+      if (dbError) console.error('Order DB insert failed:', dbError.message);
+    } catch (dbErr) {
+      console.error('Order DB insert error:', dbErr.message);
+    }
+  }
 
   const itemsHtml = items.map(i =>
     `<tr>

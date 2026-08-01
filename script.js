@@ -420,3 +420,55 @@ function initHeroSlider() {
 }
 
 initHeroSlider();
+
+(function trackVisit() {
+  try {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
+    let sid = localStorage.getItem('ys_session');
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem('ys_session', sid);
+    }
+    const device = {
+      model: '',
+      os: '',
+      browserName: '',
+      platform: navigator.platform || '',
+      screen: (window.screen && screen.width) ? screen.width + 'x' + screen.height : '',
+      language: navigator.language || '',
+      touch: 'ontouchstart' in window ? 'Yes' : 'No',
+      ua: navigator.userAgent || ''
+    };
+    const ua = device.ua;
+    if (/Android/i.test(ua)) device.os = 'Android';
+    else if (/iPhone|iPad|iPod/i.test(ua)) device.os = /iPad/i.test(ua) ? 'iPadOS' : 'iOS';
+    else if (/Windows/i.test(ua)) device.os = 'Windows';
+    else if (/Macintosh|Mac OS X/i.test(ua)) device.os = 'macOS';
+    else if (/Linux/i.test(ua)) device.os = 'Linux';
+    if (/Edg\//i.test(ua)) device.browserName = 'Edge';
+    else if (/OPR\/|Opera/i.test(ua)) device.browserName = 'Opera';
+    else if (/Chrome/i.test(ua)) device.browserName = 'Chrome';
+    else if (/Safari/i.test(ua)) device.browserName = 'Safari';
+    else if (/Firefox/i.test(ua)) device.browserName = 'Firefox';
+    else device.browserName = 'Other';
+    if (navigator.deviceMemory) device.memory = navigator.deviceMemory + 'GB';
+    if (navigator.hardwareConcurrency) device.cores = navigator.hardwareConcurrency;
+
+    const body = JSON.stringify({
+      session_id: sid,
+      page: location.pathname,
+      referrer: document.referrer || '',
+      device
+    });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/track-visit', new Blob([body], { type: 'application/json' }));
+    } else {
+      fetch('/api/track-visit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        keepalive: true
+      });
+    }
+  } catch (e) { /* tracking must never break the site */ }
+})();

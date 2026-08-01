@@ -8,6 +8,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
+app.post('/api/login', require('./api/login'));
+app.post('/api/track-visit', require('./api/track-visit'));
+app.get('/api/products', require('./api/products'));
+app.use('/api/admin/stats', require('./api/admin/stats'));
+app.use('/api/admin/visits', require('./api/admin/visits'));
+app.use('/api/admin/orders', require('./api/admin/orders'));
+app.use('/api/admin/products', require('./api/admin/products'));
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtpout.secureserver.net',
   port: parseInt(process.env.SMTP_PORT || '465'),
