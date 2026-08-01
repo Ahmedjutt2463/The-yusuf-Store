@@ -158,7 +158,15 @@
         const res = await fetch(API_URL + '/place-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, phone, address, items, total })
+          body: JSON.stringify({
+            name, email, phone, address, items, total,
+            device: {
+              browser: navigator.userAgent,
+              platform: navigator.platform,
+              screen: (window.screen && screen.width) ? screen.width + 'x' + screen.height : 'Unknown',
+              language: navigator.language
+            }
+          })
         });
 
         const data = await res.json();

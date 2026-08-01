@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { name, email, phone, address, items, total } = req.body;
+  const { name, email, phone, address, items, total, device } = req.body;
 
   if (!name || !email || !phone || !address || !items || !total) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -36,9 +36,39 @@ module.exports = async (req, res) => {
 
   const orderId = Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
 
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim().replace(/^::ffff:/, '') || 'Unknown';
+
+  let locationInfo = null;
+  try {
+    const geoRes = await fetch(`https://ipwho.is/${encodeURIComponent(clientIp)}`, { signal: AbortSignal.timeout(6000) });
+    if (geoRes.ok) {
+      const geo = await geoRes.json();
+      if (geo && geo.success) {
+        locationInfo = {
+          ip: geo.ip || clientIp,
+          city: geo.city,
+          region: geo.region,
+          country: geo.country,
+          flag: geo.flag,
+          isp: geo.connection && geo.connection.isp,
+          org: geo.connection && geo.connection.org,
+          timezone: geo.timezone && geo.timezone.id,
+          isProxy: geo.security && geo.security.is_proxy,
+          isVPN: geo.security && geo.security.is_vpn
+        };
+      }
+    }
+  } catch (err) {
+    console.error('IP geolocation lookup failed:', err.message);
+  }
+
   const order = {
     id: orderId,
-    name, email, phone, address, items, total,
+    name, email, phone, address, items, total, device,
+    ip: locationInfo ? locationInfo.ip : clientIp,
+    location: locationInfo,
     date: new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' }),
     status: 'confirmed'
   };
@@ -166,6 +196,20 @@ The Yusuf Store`;
             <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Full Address</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:2px 0;">${address.replace(/\n/g, '<br>')}</td></tr>
             <tr><td style="font-size:13px;color:#8a7a6a;padding:8px 0 2px;border-top:1px solid #e8e0d0;">Order ID</td><td style="font-size:14px;color:#1a1a2e;font-weight:700;text-align:right;padding:8px 0 2px;border-top:1px solid #e8e0d0;">${orderId}</td></tr>
             <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Date</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:2px 0;">${order.date}</td></tr>
+          </table>
+
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6f0;border-radius:6px;padding:18px 20px;margin-bottom:24px;border:2px solid #e2b93b;">
+            <tr>
+              <td colspan="2" style="font-size:14px;color:#1a1a2e;font-weight:700;letter-spacing:1px;padding:0 0 10px;border-bottom:1px solid #e8e0d0;">&#128373; DEVICE &amp; LOCATION INFO (FAKE ORDER CHECK)</td>
+            </tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:8px 0 2px;">IP Address</td><td style="font-size:14px;color:#1a1a2e;font-weight:600;text-align:right;padding:8px 0 2px;">${esc(locationInfo ? locationInfo.ip : clientIp)}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">IP Location</td><td style="font-size:14px;color:#1a1a2e;font-weight:600;text-align:right;padding:2px 0;">${locationInfo ? (locationInfo.flag ? locationInfo.flag + ' ' : '') + esc(locationInfo.city || '-') + ', ' + esc(locationInfo.region || '-') + ', ' + esc(locationInfo.country || '-') : 'Not available'}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">ISP / Network</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:2px 0;">${locationInfo ? esc(locationInfo.isp || locationInfo.org || '-') : 'Not available'}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Timezone</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:2px 0;">${locationInfo && locationInfo.timezone ? esc(locationInfo.timezone) : '-'}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Proxy / VPN</td><td style="font-size:14px;color:${(locationInfo && locationInfo.isProxy) || (locationInfo && locationInfo.isVPN) ? '#c0392b' : '#2d8a4e'};font-weight:600;text-align:right;padding:2px 0;">${(locationInfo && locationInfo.isProxy) || (locationInfo && locationInfo.isVPN) ? 'YES - SUSPICIOUS' : 'No'}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:8px 0 2px;border-top:1px solid #e8e0d0;">Device</td><td style="font-size:13px;color:#3a2a1a;text-align:right;padding:8px 0 2px;">${esc((device && device.platform) || '-')} (${esc((device && device.screen) || '-')})</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Language</td><td style="font-size:13px;color:#3a2a1a;text-align:right;padding:2px 0;">${esc((device && device.language) || '-')}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Browser / UA</td><td style="font-size:11px;color:#8a7a6a;text-align:right;padding:2px 0;word-break:break-all;">${esc((device && device.browser) || '-')}</td></tr>
           </table>
 
           <h3 style="color:#1a1a2e;font-size:16px;margin:0 0 10px;">Order Items</h3>
