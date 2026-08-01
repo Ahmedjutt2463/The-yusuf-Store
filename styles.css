@@ -1174,6 +1174,30 @@ footer {
   color: var(--gold);
 }
 
+.footer-social {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.7rem;
+}
+
+.footer-social a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-footer);
+  transition: background 0.3s, color 0.3s, transform 0.3s;
+}
+
+.footer-social a:hover {
+  background: var(--gold);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
 .footer-bottom {
   text-align: center;
   padding: 1.2rem;
