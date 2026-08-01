@@ -337,6 +337,9 @@ function switchImage(src, thumb) {
   if (!mainImg) return;
   mainImg.src = src;
   mainImg.style.display = 'block';
+  mainImg.classList.remove('img-swap');
+  void mainImg.offsetWidth;
+  mainImg.classList.add('img-swap');
   const mainVideo = document.getElementById('mainVideo');
   if (mainVideo) {
     mainVideo.pause();

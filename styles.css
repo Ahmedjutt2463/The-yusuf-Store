@@ -631,6 +631,19 @@ h1, h2, h3, h4, .logo, .hero h1, .page-hero h1, .detail-info h1 {
   max-width: 560px;
 }
 
+.detail-gallery {
+  touch-action: pan-y;
+}
+
+.main-image img.img-swap {
+  animation: imgFade 0.3s ease;
+}
+
+@keyframes imgFade {
+  from { opacity: 0.3; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .main-image {
   width: 100%;
   aspect-ratio: 1;
@@ -639,7 +652,6 @@ h1, h2, h3, h4, .logo, .hero h1, .page-hero h1, .detail-info h1 {
   margin-bottom: 0.8rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   box-shadow: var(--shadow);
 }
