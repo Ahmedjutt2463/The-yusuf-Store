@@ -189,6 +189,59 @@
       totalEl.textContent = 'Rs. ' + total.toLocaleString();
     }
 
+    async function getDeviceInfo() {
+      const ua = navigator.userAgent || '';
+      let model = '';
+      let os = 'Unknown';
+      let browser = 'Unknown';
+
+      const androidMatch = ua.match(/; ([\w][\w\- ]{1,20}) Build\//);
+      if (androidMatch) model = androidMatch[1].trim();
+      if (/iPhone/.test(ua)) model = 'iPhone';
+      else if (/iPad/.test(ua)) model = 'iPad';
+      else if (/Macintosh/.test(ua)) model = 'Mac';
+      else if (/Windows/.test(ua)) model = 'Windows PC/Laptop';
+      else if (/Linux/.test(ua) && !model) model = 'Linux PC';
+
+      if (/Windows NT 10.0/.test(ua)) os = 'Windows 10/11';
+      else if (/Windows/.test(ua)) os = 'Windows';
+      else if (/iPhone|iPad|iPod/.test(ua)) os = 'iOS';
+      else if (/Android/.test(ua)) os = 'Android';
+      else if (/Mac OS X/.test(ua)) os = 'macOS';
+      else if (/CrOS/.test(ua)) os = 'ChromeOS';
+      else if (/Linux/.test(ua)) os = 'Linux';
+
+      if (/Edg\//.test(ua)) browser = 'Microsoft Edge';
+      else if (/OPR\//.test(ua)) browser = 'Opera';
+      else if (/Chrome\//.test(ua)) browser = 'Google Chrome';
+      else if (/Firefox\//.test(ua)) browser = 'Mozilla Firefox';
+      else if (/Safari\//.test(ua)) browser = 'Safari';
+
+      const device = {
+        browser: ua,
+        browserName: browser,
+        os: os,
+        platform: navigator.platform || 'Unknown',
+        model: model || 'Unknown',
+        screen: (window.screen && screen.width) ? screen.width + 'x' + screen.height : 'Unknown',
+        language: navigator.language || 'Unknown',
+        touch: navigator.maxTouchPoints ? 'Yes' : 'No',
+        memory: navigator.deviceMemory ? navigator.deviceMemory + ' GB' : 'Unknown',
+        cores: navigator.hardwareConcurrency || 'Unknown'
+      };
+
+      if (navigator.userAgentData && typeof navigator.userAgentData.getHighEntropyValues === 'function') {
+        try {
+          const hi = await navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'architecture', 'bitness']);
+          if (hi && hi.model) device.model = hi.model;
+          if (hi && hi.architecture) device.architecture = hi.architecture;
+          if (hi && hi.bitness) device.bitness = hi.bitness;
+          if (hi && hi.platformVersion) device.platformVersion = hi.platformVersion;
+        } catch (err) { }
+      }
+      return device;
+    }
+
     document.getElementById('checkoutForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
@@ -203,6 +256,8 @@
         return;
       }
 
+      const device = await getDeviceInfo();
+
       const btn = document.getElementById('placeOrderBtn');
       btn.textContent = 'Placing Order...';
       btn.disabled = true;
@@ -213,12 +268,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name, email, phone, address, items, total,
-            device: {
-              browser: navigator.userAgent,
-              platform: navigator.platform,
-              screen: (window.screen && screen.width) ? screen.width + 'x' + screen.height : 'Unknown',
-              language: navigator.language
-            },
+            device,
             gps: gpsLocation
           })
         });
