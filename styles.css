@@ -1060,9 +1060,12 @@ h1, h2, h3, h4, .logo, .hero h1, .page-hero h1, .detail-info h1 {
 .about {
   padding: 5rem 5%;
   text-align: center;
-  background: var(--about-bg);
+  background-color: var(--about-bg);
+  background-image: var(--hero-overlay), url('images/BG (4).jpeg');
+  background-size: cover;
+  background-position: center;
   color: #fff;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 .about .section-title {
@@ -1130,9 +1133,12 @@ h1, h2, h3, h4, .logo, .hero h1, .page-hero h1, .detail-info h1 {
 }
 
 footer {
-  background: var(--bg-footer);
+  background-color: var(--bg-footer);
+  background-image: var(--hero-overlay), url('images/BG (5).jpeg');
+  background-size: cover;
+  background-position: center;
   color: var(--text-footer);
-  transition: background 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 .footer-content {
