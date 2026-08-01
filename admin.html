@@ -262,11 +262,16 @@
         <select id="prodCategory" onchange="loadProducts()">
           <option value="all">All categories</option>
         </select>
+        <select id="prodStock" onchange="loadProducts()">
+          <option value="all">All stock</option>
+          <option value="in">In stock</option>
+          <option value="out">Out of stock</option>
+        </select>
         <button class="btn" onclick="openProductForm()">+ Add Product</button>
       </div>
       <div style="overflow-x:auto">
         <table>
-          <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Old Price</th><th>Stock</th><th>Active</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Old Price</th><th>Sold</th><th>Stock</th><th>Active</th><th>Actions</th></tr></thead>
           <tbody id="productsBody"></tbody>
         </table>
       </div>
@@ -540,6 +545,8 @@ async function loadProducts() {
     if (q) params.set('search', q);
     const cat = $('prodCategory').value;
     if (cat && cat !== 'all') params.set('category', cat);
+    const stock = $('prodStock').value;
+    if (stock && stock !== 'all') params.set('stock', stock);
 
     const r = await api('/api/admin/products?' + params.toString());
     PRODUCTS_CACHE = r.data || [];
@@ -547,18 +554,22 @@ async function loadProducts() {
     const catSel = $('prodCategory');
     catSel.innerHTML = '<option value="all">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
 
-    $('productsBody').innerHTML = (r.data || []).map(p =>
-      '<tr>' +
+    $('productsBody').innerHTML = (r.data || []).map(p => {
+      const stockBadge = p.out_of_stock
+        ? '<span class="badge cancelled">Out of Stock</span>'
+        : esc(p.stock != null ? p.stock : 0);
+      return '<tr>' +
         '<td>' + esc(p.name) + '<br><span class="muted" style="font-size:0.7rem">/' + esc(p.slug || '') + '</span></td>' +
         '<td>' + esc(p.category || '-') + '</td>' +
         '<td>' + fmtMoney(p.price) + '</td>' +
         '<td>' + (p.old_price ? fmtMoney(p.old_price) : '-') + '</td>' +
-        '<td>' + esc(p.stock != null ? p.stock : 0) + '</td>' +
+        '<td>' + esc(p.sold || 0) + '</td>' +
+        '<td>' + stockBadge + '</td>' +
         '<td>' + (p.active ? '<span class="badge delivered">Active</span>' : '<span class="badge cancelled">Hidden</span>') + '</td>' +
         '<td><button class="btn sm ghost" onclick="openProductForm(\'' + p.id + '\')">Edit</button> ' +
         '<button class="btn sm danger" onclick="deleteProduct(\'' + p.id + '\', \'' + esc(p.name).replace(/'/g, "\\'") + '\')">Delete</button></td>' +
-      '</tr>'
-    ).join('') || '<tr><td colspan="7" class="muted">No products. Add your first product.</td></tr>';
+      '</tr>';
+    }).join('') || '<tr><td colspan="8" class="muted">No products. Add your first product.</td></tr>';
   } catch (err) { showMsg(err.message, false); }
 }
 let PRODUCTS_CACHE = [];

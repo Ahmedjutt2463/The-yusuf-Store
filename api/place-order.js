@@ -94,6 +94,30 @@ module.exports = async (req, res) => {
     }
   }
 
+  // Reduce inventory stock for each item sold (best-effort, never blocks the order)
+  if (sb) {
+    try {
+      const { data: prods } = await sb.from('products').select('id, name, slug, stock').limit(1000);
+      if (prods && prods.length) {
+        const byName = new Map(prods.map(p => [String(p.name || '').toLowerCase().trim(), p]));
+        const bySlug = new Map(prods.map(p => [String(p.slug || '').toLowerCase(), p]));
+        for (const item of items || []) {
+          if (!item) continue;
+          const qty = Number(item.quantity) || 1;
+          const nameKey = String(item.name || '').toLowerCase().trim();
+          const slugKey = String(item.id || '').toLowerCase().replace(/\.html$/, '').trim();
+          const prod = byName.get(nameKey) || bySlug.get(slugKey);
+          if (!prod) continue;
+          const stock = Math.max(0, (Number(prod.stock) || 0) - qty);
+          const { error: invErr } = await sb.from('products').update({ stock }).eq('id', prod.id);
+          if (invErr) console.error('Inventory update failed:', invErr.message);
+        }
+      }
+    } catch (invErr) {
+      console.error('Inventory update error:', invErr.message);
+    }
+  }
+
   const itemsHtml = items.map(i =>
     `<tr>
       <td style="padding:10px 12px;border-bottom:1px solid #e8e0d0;font-size:14px;color:#3a2a1a;">${i.name}</td>

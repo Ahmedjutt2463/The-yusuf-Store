@@ -39,10 +39,37 @@ module.exports = async (req, res) => {
       } else if (active === 'false') {
         query = query.eq('active', false);
       }
+      if (req.query.stock === 'out') {
+        query = query.lte('stock', 0);
+      } else if (req.query.stock === 'in') {
+        query = query.gt('stock', 0);
+      }
 
       const { data, error, count } = await query;
       if (error) throw error;
-      return res.json({ data: data || [], total: count || 0 });
+
+      const products = data || [];
+
+      // Compute "sold" from actual orders and flag out-of-stock
+      const { data: orders } = await sb.from('orders').select('items').limit(100000);
+      const prodByName = new Map(products.map(p => [String(p.name || '').toLowerCase().trim(), p]));
+      const prodBySlug = new Map(products.map(p => [String(p.slug || '').toLowerCase(), p]));
+      const soldMap = {};
+      (orders || []).forEach(o => {
+        (o.items || []).forEach(i => {
+          const qty = Number(i.quantity) || 1;
+          const n = String(i.name || '').toLowerCase().trim();
+          const s = String(i.id || '').toLowerCase().replace(/\.html$/, '');
+          const p = prodByName.get(n) || prodBySlug.get(s);
+          if (p) soldMap[p.id] = (soldMap[p.id] || 0) + qty;
+        });
+      });
+      products.forEach(p => {
+        p.sold = soldMap[p.id] || 0;
+        p.out_of_stock = (Number(p.stock) || 0) <= 0;
+      });
+
+      return res.json({ data: products, total: count || 0 });
     }
 
     if (req.method === 'POST') {
