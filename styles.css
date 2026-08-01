@@ -932,6 +932,37 @@ h1, h2, h3, h4, .logo, .hero h1, .page-hero h1, .detail-info h1 {
   white-space: nowrap;
 }
 
+.btn-locate {
+  display: block;
+  margin-top: 0.6rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--btn-primary-bg);
+  background: transparent;
+  border: 1px dashed var(--btn-primary-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.btn-locate:hover:not(:disabled) {
+  background: var(--btn-primary-bg);
+  color: #fff;
+  border-color: var(--btn-primary-bg);
+}
+
+.btn-locate:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.locate-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .btn-primary {
   background: var(--btn-primary-bg);
   color: var(--text-white);

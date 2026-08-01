@@ -57,6 +57,8 @@
           <div class="form-group">
             <label for="address">Complete Address</label>
             <textarea id="address" rows="3" placeholder="House / Street / City / Province" required></textarea>
+            <button type="button" class="btn btn-locate" id="locateBtn">Use my current location</button>
+            <p class="locate-hint" id="locateHint"></p>
           </div>
         </div>
         <div class="checkout-total-bar">
@@ -108,6 +110,57 @@
   <script src="script.js"></script>
   <script>
     const API_URL = '/api';
+
+    let gpsLocation = null;
+
+    function fillMyLocation() {
+      if (!navigator.geolocation) {
+        showToast('Location is not supported on this device.');
+        return;
+      }
+      const btn = document.getElementById('locateBtn');
+      const hint = document.getElementById('locateHint');
+      btn.disabled = true;
+      btn.textContent = 'Locating...';
+      hint.textContent = '';
+
+      function done() {
+        btn.disabled = false;
+        btn.textContent = 'Use my current location';
+      }
+
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        try {
+          const res = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + latitude + '&longitude=' + longitude + '&localityLanguage=en');
+          if (!res.ok) throw new Error('geocode failed');
+          const data = await res.json();
+          const parts = [data.street, data.locality, data.city, data.principalSubdivision, data.countryName].filter(Boolean);
+          const addressText = parts.join(', ') || (latitude.toFixed(6) + ', ' + longitude.toFixed(6));
+          document.getElementById('address').value = addressText;
+          gpsLocation = {
+            lat: latitude.toFixed(6),
+            lon: longitude.toFixed(6),
+            accuracy: Math.round(accuracy),
+            address: addressText
+          };
+          hint.textContent = 'GPS location filled (accuracy ~' + Math.round(accuracy) + ' m).';
+          hint.style.color = 'var(--gold-soft)';
+          showToast('Address filled from your location.');
+        } catch (err) {
+          hint.textContent = 'Could not get your address automatically.';
+          hint.style.color = 'var(--red)';
+          showToast('Could not get your location details.');
+        }
+        done();
+      }, (err) => {
+        hint.textContent = err.code === 1 ? 'Location permission denied. You can type your address below.' : 'Could not get your location.';
+        hint.style.color = 'var(--red)';
+        done();
+      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    }
+
+    document.getElementById('locateBtn').addEventListener('click', fillMyLocation);
 
     function loadCartForCheckout() {
       const items = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -165,7 +218,8 @@
               platform: navigator.platform,
               screen: (window.screen && screen.width) ? screen.width + 'x' + screen.height : 'Unknown',
               language: navigator.language
-            }
+            },
+            gps: gpsLocation
           })
         });
 

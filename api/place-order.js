@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { name, email, phone, address, items, total, device } = req.body;
+  const { name, email, phone, address, items, total, device, gps } = req.body;
 
   if (!name || !email || !phone || !address || !items || !total) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
 
   const order = {
     id: orderId,
-    name, email, phone, address, items, total, device,
+    name, email, phone, address, items, total, device, gps,
     ip: locationInfo ? locationInfo.ip : clientIp,
     location: locationInfo,
     date: new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' }),
@@ -207,6 +207,8 @@ The Yusuf Store`;
             <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">ISP / Network</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:2px 0;">${locationInfo ? esc(locationInfo.isp || locationInfo.org || '-') : 'Not available'}</td></tr>
             <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Timezone</td><td style="font-size:14px;color:#3a2a1a;text-align:right;padding:2px 0;">${locationInfo && locationInfo.timezone ? esc(locationInfo.timezone) : '-'}</td></tr>
             <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Proxy / VPN</td><td style="font-size:14px;color:${(locationInfo && locationInfo.isProxy) || (locationInfo && locationInfo.isVPN) ? '#c0392b' : '#2d8a4e'};font-weight:600;text-align:right;padding:2px 0;">${(locationInfo && locationInfo.isProxy) || (locationInfo && locationInfo.isVPN) ? 'YES - SUSPICIOUS' : 'No'}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:8px 0 2px;border-top:1px solid #e8e0d0;">GPS Location</td><td style="font-size:14px;color:#1a1a2e;font-weight:600;text-align:right;padding:8px 0 2px;">${gps ? esc(gps.lat + ', ' + gps.lon) + ' (within ~' + esc(gps.accuracy) + ' m)' : 'Not provided'}</td></tr>
+            <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">GPS Address</td><td style="font-size:12px;color:#3a2a1a;text-align:right;padding:2px 0;">${gps && gps.address ? esc(gps.address) : '-'}</td></tr>
             <tr><td style="font-size:13px;color:#8a7a6a;padding:8px 0 2px;border-top:1px solid #e8e0d0;">Device</td><td style="font-size:13px;color:#3a2a1a;text-align:right;padding:8px 0 2px;">${esc((device && device.platform) || '-')} (${esc((device && device.screen) || '-')})</td></tr>
             <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Language</td><td style="font-size:13px;color:#3a2a1a;text-align:right;padding:2px 0;">${esc((device && device.language) || '-')}</td></tr>
             <tr><td style="font-size:13px;color:#8a7a6a;padding:2px 0;">Browser / UA</td><td style="font-size:11px;color:#8a7a6a;text-align:right;padding:2px 0;word-break:break-all;">${esc((device && device.browser) || '-')}</td></tr>
