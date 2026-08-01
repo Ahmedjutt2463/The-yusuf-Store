@@ -12,6 +12,7 @@ app.post('/api/login', require('./api/login'));
 app.post('/api/track-visit', require('./api/track-visit'));
 app.get('/api/products', require('./api/products'));
 app.use('/api/admin/stats', require('./api/admin/stats'));
+app.use('/api/admin/sales', require('./api/admin/sales'));
 app.use('/api/admin/visits', require('./api/admin/visits'));
 app.use('/api/admin/orders', require('./api/admin/orders'));
 app.use('/api/admin/products', require('./api/admin/products'));

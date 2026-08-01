@@ -157,6 +157,7 @@
     <h2>THE YUSUF STORE</h2>
     <nav>
       <a data-view="overview" class="active">Overview</a>
+      <a data-view="sales">Sales</a>
       <a data-view="visitors">Visitors</a>
       <a data-view="orders">Orders</a>
       <a data-view="products">Products</a>
@@ -203,6 +204,37 @@
         <div class="panel">
           <h3>Recent Orders</h3>
           <div id="recentOrders"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SALES -->
+    <section id="view-sales" class="hidden">
+      <h1>Sales</h1>
+      <div class="stats-grid" id="salesCards"></div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Daily Revenue - last 30 days</h3>
+          <div class="chart-bars" id="salesDailyChart"></div>
+        </div>
+        <div class="panel">
+          <h3>Monthly Revenue - last 12 months</h3>
+          <div class="chart-bars" id="salesMonthlyChart"></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Best Selling Products</h3>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Product</th><th>Units Sold</th><th>Revenue</th></tr></thead>
+              <tbody id="topProductsBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Orders by Status</h3>
+          <div id="salesStatus"></div>
         </div>
       </div>
     </section>
@@ -375,6 +407,7 @@ function enterDash() {
   $('loginView').classList.add('hidden');
   $('dashView').classList.remove('hidden');
   loadStats();
+  loadSales();
   loadVisitors();
   loadOrders();
   loadProducts();
@@ -386,10 +419,11 @@ document.querySelectorAll('.sidebar nav a').forEach(a => {
     document.querySelectorAll('.sidebar nav a').forEach(x => x.classList.remove('active'));
     a.classList.add('active');
     const v = a.dataset.view;
-    ['overview', 'visitors', 'orders', 'products'].forEach(x => {
+    ['overview', 'sales', 'visitors', 'orders', 'products'].forEach(x => {
       $('view-' + x).classList.toggle('hidden', x !== v);
     });
     if (v === 'overview') loadStats();
+    if (v === 'sales') loadSales();
     if (v === 'visitors') loadVisitors();
     if (v === 'orders') loadOrders();
     if (v === 'products') loadProducts();
@@ -453,6 +487,51 @@ function renderRecentOrders(list) {
       '<span>' + fmtMoney(o.total) + '</span></li>'
     ).join('') + '</ul>'
     : '<p class="muted">No orders yet</p>';
+}
+
+/* ---------- SALES ---------- */
+async function loadSales() {
+  try {
+    const s = await api('/api/admin/sales');
+    const p = s.periods || {};
+    const fmtShort = v => 'Rs. ' + Number(v).toLocaleString('en-PK', { maximumFractionDigits: 0 });
+    $('salesCards').innerHTML = [
+      ['Today', p.today ? p.today.count + ' orders' : '0 orders', fmtShort(p.today ? p.today.revenue : 0), 'gold'],
+      ['This Week', p.week ? p.week.count + ' orders' : '0 orders', fmtShort(p.week ? p.week.revenue : 0)],
+      ['This Month', p.month ? p.month.count + ' orders' : '0 orders', fmtShort(p.month ? p.month.revenue : 0)],
+      ['This Year', p.year ? p.year.count + ' orders' : '0 orders', fmtShort(p.year ? p.year.revenue : 0)],
+      ['All Time', p.all ? p.all.count + ' orders' : '0 orders', fmtShort(p.all ? p.all.revenue : 0), 'gold'],
+      ['Avg Order Value', '', fmtShort(s.averageOrderValue || 0), 'green']
+    ].map(([label, sub, value, cls]) =>
+      '<div class="stat-card ' + (cls || '') + '"><div class="label">' + label + '</div><div class="value">' + value + '</div><div class="sub">' + sub + '</div></div>'
+    ).join('');
+
+    renderMoneyChart($('salesDailyChart'), (s.daily || []).map(d => ({ label: d.date.slice(5), value: d.revenue, count: d.count })));
+    renderMoneyChart($('salesMonthlyChart'), (s.monthly || []).map(m => ({ label: m.month.slice(2), value: m.revenue, count: m.count })));
+
+    $('topProductsBody').innerHTML = (s.topProducts || []).length
+      ? s.topProducts.map(tp =>
+        '<tr><td>' + esc(tp.name) + '</td><td>' + esc(tp.qty) + '</td><td>' + fmtMoney(tp.revenue) + '</td></tr>').join('')
+      : '<tr><td colspan="3" class="muted">No sales yet</td></tr>';
+
+    const st = s.statusCounts || {};
+    const statusLabels = ['confirmed', 'shipped', 'delivered', 'cancelled', 'pending'];
+    $('salesStatus').innerHTML = statusLabels.some(k => st[k]) || Object.keys(st).length
+      ? '<ul class="tight">' + statusLabels.map(k => st[k]
+        ? '<li><span class="badge ' + k + '">' + k + '</span><span class="cnt">' + st[k] + '</span></li>'
+        : '').join('') + '</ul>'
+      : '<p class="muted">No orders yet</p>';
+  } catch (err) { showMsg(err.message, false); }
+}
+function renderMoneyChart(el, data) {
+  const max = Math.max(1, ...data.map(d => d.value));
+  el.innerHTML = data.map(d => {
+    const h = Math.round((d.value / max) * 100);
+    return '<div class="bar-col" title="' + d.label + ': Rs. ' + Number(d.value).toLocaleString() + ' (' + d.count + ' orders)">' +
+      '<span class="bar-value">' + (d.value >= 1000000 ? (d.value / 1000000).toFixed(1) + 'M' : d.value >= 1000 ? Math.round(d.value / 1000) + 'k' : d.value) + '</span>' +
+      '<div class="bar" style="height:' + h + '%"></div>' +
+      '<span class="bar-label">' + esc(d.label) + '</span></div>';
+  }).join('');
 }
 
 /* ---------- VISITORS ---------- */
