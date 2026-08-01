@@ -331,3 +331,76 @@ backToTop.addEventListener('click', () => {
 window.addEventListener('scroll', () => {
   backToTop.classList.toggle('visible', window.scrollY > 400);
 });
+
+function switchImage(src, thumb) {
+  const mainImg = document.getElementById('mainImg');
+  if (!mainImg) return;
+  mainImg.src = src;
+  mainImg.style.display = 'block';
+  const mainVideo = document.getElementById('mainVideo');
+  if (mainVideo) {
+    mainVideo.pause();
+    mainVideo.style.display = 'none';
+  }
+  if (thumb) {
+    const gallery = thumb.closest('.thumbnails');
+    if (gallery) {
+      gallery.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+    }
+  }
+}
+
+function gallerySwipe() {
+  const gallery = document.querySelector('.detail-gallery');
+  if (!gallery) return;
+
+  let startX = null;
+  let startY = null;
+
+  gallery.addEventListener('touchstart', (e) => {
+    startX = e.changedTouches[0].clientX;
+    startY = e.changedTouches[0].clientY;
+  }, { passive: true });
+
+  gallery.addEventListener('touchend', (e) => {
+    if (startX === null) return;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const deltaX = endX - startX;
+    const deltaY = endY - startY;
+    startX = null;
+    startY = null;
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+
+    const mainVideo = document.getElementById('mainVideo');
+    const videoThumb = gallery.querySelector('.thumb-video');
+    const imageThumbs = Array.from(gallery.querySelectorAll('.thumb:not(.thumb-video)'));
+    if (imageThumbs.length < 2) return;
+
+    const videoShowing = mainVideo && mainVideo.style.display !== 'none';
+
+    if (deltaX < 0) {
+      if (videoShowing) {
+        imageThumbs[0].click();
+      } else {
+        const idx = imageThumbs.findIndex(t => t.classList.contains('active'));
+        imageThumbs[(idx + 1) % imageThumbs.length].click();
+      }
+    } else {
+      if (videoThumb && !videoShowing) {
+        const idx = imageThumbs.findIndex(t => t.classList.contains('active'));
+        if (idx <= 0) {
+          videoThumb.click();
+        } else {
+          imageThumbs[idx - 1].click();
+        }
+      } else if (!videoThumb) {
+        const idx = imageThumbs.findIndex(t => t.classList.contains('active'));
+        imageThumbs[(idx - 1 + imageThumbs.length) % imageThumbs.length].click();
+      }
+    }
+  }, { passive: true });
+}
+
+gallerySwipe();
