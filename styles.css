@@ -924,6 +924,14 @@ h1, h2, h3, h4, .logo, .hero h1, .page-hero h1, .detail-info h1 {
   flex-wrap: wrap;
 }
 
+.detail-actions .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .btn-primary {
   background: var(--btn-primary-bg);
   color: var(--text-white);
@@ -1306,15 +1314,6 @@ footer {
     flex: 1;
     text-align: center;
     min-width: 72px;
-  }
-
-  .detail-actions {
-    flex-direction: column;
-  }
-
-  .detail-actions .btn {
-    width: 100%;
-    text-align: center;
   }
 
   .gallery {
