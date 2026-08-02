@@ -474,19 +474,24 @@ initHeroSlider();
 })();
 
 async function syncProductData() {
-  try {
-    const res = await fetch('/api/products', { cache: 'no-store' });
-    const payload = await res.json();
-    if (!payload || !Array.isArray(payload.data)) return;
-    const products = payload.data;
+  const PRODUCTS_CACHE_KEY = 'ys_products_v1';
+  const fmt = n => 'Rs. ' + Number(n).toLocaleString('en-PK');
+  let applied = false;
+
+  document.querySelectorAll('.add-to-cart, .btn-buy').forEach(btn => {
+    if (!btn.dataset.__orig) btn.dataset.__orig = btn.textContent;
+    btn.disabled = true;
+    btn.classList.add('disabled');
+  });
+
+  function applyProductData(products) {
+    if (!Array.isArray(products) || !products.length) return false;
     const bySlug = new Map();
     const byName = new Map();
     products.forEach(p => {
       bySlug.set(String(p.slug || '').toLowerCase().trim(), p);
       byName.set(String(p.name || '').toLowerCase().trim(), p);
     });
-    const fmt = n => 'Rs. ' + Number(n).toLocaleString('en-PK');
-
     const pageSlug = location.pathname.split('/').pop().replace('.html', '').toLowerCase();
     const pageProd = bySlug.get(pageSlug);
 
@@ -494,7 +499,6 @@ async function syncProductData() {
       const price = Number(pageProd.price) || 0;
       const oldPrice = Number(pageProd.old_price) || 0;
       const inStock = Number(pageProd.stock) > 0;
-
       document.querySelectorAll('.original').forEach(el => {
         if (oldPrice) el.textContent = fmt(oldPrice);
       });
@@ -511,15 +515,6 @@ async function syncProductData() {
         const pct = Math.round((1 - price / oldPrice) * 100);
         if (pct > 0) badge.textContent = pct + '% OFF';
       }
-      const addBtn = document.querySelector('.detail-info .add-to-cart');
-      if (addBtn && !inStock) {
-        addBtn.disabled = true;
-        addBtn.classList.add('disabled');
-        addBtn.textContent = 'Out of Stock';
-        const buy = addBtn.closest('.detail-actions')?.querySelector('.btn-buy');
-        if (buy) { buy.disabled = true; buy.classList.add('disabled'); buy.textContent = 'Out of Stock'; }
-      }
-
       const ld = document.querySelector('script[type="application/ld+json"]');
       if (ld) {
         try {
@@ -537,23 +532,68 @@ async function syncProductData() {
     document.querySelectorAll('.add-to-cart[data-product]').forEach(btn => {
       const key = String(btn.dataset.product).toLowerCase().trim();
       const prod = byName.get(key) || bySlug.get(key.replace(/\s+/g, '-'));
-      if (!prod) return;
-      const price = Number(prod.price) || 0;
-      const oldPrice = Number(prod.old_price) || 0;
-      const inStock = Number(prod.stock) > 0;
       const card = btn.closest('.product-card');
-      if (card) {
+      if (card && prod) {
+        const price = Number(prod.price) || 0;
+        const oldPrice = Number(prod.old_price) || 0;
         const sale = card.querySelector('.sale');
         if (sale) sale.textContent = fmt(price);
         const orig = card.querySelector('.original');
         if (orig && oldPrice) orig.textContent = fmt(oldPrice);
       }
+      const inStock = prod ? Number(prod.stock) > 0 : true;
       if (!inStock) {
-        btn.disabled = true;
-        btn.classList.add('disabled');
+        if (!btn.dataset.__orig) btn.dataset.__orig = btn.textContent;
+        btn.classList.add('oos');
         btn.textContent = 'Out of Stock';
       }
     });
-  } catch (e) { /* keep hardcoded prices if the API is unavailable */ }
+
+    const addBtn = document.querySelector('.detail-info .add-to-cart');
+    const buyBtn = addBtn && addBtn.closest('.detail-actions')?.querySelector('.btn-buy');
+    if (buyBtn && addBtn) {
+      if (!buyBtn.dataset.__orig) buyBtn.dataset.__orig = buyBtn.textContent;
+      if (addBtn.classList.contains('oos')) {
+        buyBtn.classList.add('oos');
+        buyBtn.textContent = 'Out of Stock';
+      } else {
+        buyBtn.textContent = buyBtn.dataset.__orig;
+      }
+    }
+    return true;
+  }
+
+  function setReady() {
+    document.body.classList.add('price-ready');
+    document.querySelectorAll('.add-to-cart, .btn-buy').forEach(btn => {
+      const oos = btn.classList.contains('oos');
+      btn.disabled = oos;
+      btn.classList.toggle('disabled', oos);
+      btn.textContent = oos ? 'Out of Stock' : (btn.dataset.__orig || btn.textContent);
+    });
+  }
+
+  try {
+    const cached = JSON.parse(localStorage.getItem(PRODUCTS_CACHE_KEY) || 'null');
+    if (Array.isArray(cached) && cached.length) {
+      applyProductData(cached);
+      setReady();
+      applied = true;
+    }
+  } catch (e) { /* cache may be corrupted */ }
+
+  try {
+    const res = await fetch('/api/products', { cache: 'no-store' });
+    const payload = await res.json();
+    if (payload && Array.isArray(payload.data) && payload.data.length) {
+      applyProductData(payload.data);
+      try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(payload.data)); } catch (e) { /* ignore */ }
+      setReady();
+      applied = true;
+    }
+  } catch (e) { /* fall through */ }
+
+  if (!applied) setReady();
 }
 syncProductData();
+setTimeout(() => document.body.classList.add('price-ready'), 6000);

@@ -2169,3 +2169,14 @@ footer {
   box-shadow: none !important;
   opacity: 0.8;
 }
+
+.discount-badge,
+.price .original,
+.price .sale {
+  visibility: hidden;
+}
+body.price-ready .discount-badge,
+body.price-ready .price .original,
+body.price-ready .price .sale {
+  visibility: visible;
+}
