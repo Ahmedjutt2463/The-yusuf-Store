@@ -472,3 +472,88 @@ initHeroSlider();
     }
   } catch (e) { /* tracking must never break the site */ }
 })();
+
+async function syncProductData() {
+  try {
+    const res = await fetch('/api/products', { cache: 'no-store' });
+    const payload = await res.json();
+    if (!payload || !Array.isArray(payload.data)) return;
+    const products = payload.data;
+    const bySlug = new Map();
+    const byName = new Map();
+    products.forEach(p => {
+      bySlug.set(String(p.slug || '').toLowerCase().trim(), p);
+      byName.set(String(p.name || '').toLowerCase().trim(), p);
+    });
+    const fmt = n => 'Rs. ' + Number(n).toLocaleString('en-PK');
+
+    const pageSlug = location.pathname.split('/').pop().replace('.html', '').toLowerCase();
+    const pageProd = bySlug.get(pageSlug);
+
+    if (pageProd) {
+      const price = Number(pageProd.price) || 0;
+      const oldPrice = Number(pageProd.old_price) || 0;
+      const inStock = Number(pageProd.stock) > 0;
+
+      document.querySelectorAll('.original').forEach(el => {
+        if (oldPrice) el.textContent = fmt(oldPrice);
+      });
+      document.querySelectorAll('.sale').forEach(el => {
+        el.textContent = fmt(price);
+      });
+      document.querySelectorAll('.size-option').forEach(o => {
+        o.dataset.sale = String(price);
+        o.dataset.original = String(oldPrice || price);
+        o.dataset.stock = inStock ? 'in' : 'out';
+      });
+      const badge = document.querySelector('.discount-badge');
+      if (badge && oldPrice > price) {
+        const pct = Math.round((1 - price / oldPrice) * 100);
+        if (pct > 0) badge.textContent = pct + '% OFF';
+      }
+      const addBtn = document.querySelector('.detail-info .add-to-cart');
+      if (addBtn && !inStock) {
+        addBtn.disabled = true;
+        addBtn.classList.add('disabled');
+        addBtn.textContent = 'Out of Stock';
+        const buy = addBtn.closest('.detail-actions')?.querySelector('.btn-buy');
+        if (buy) { buy.disabled = true; buy.classList.add('disabled'); buy.textContent = 'Out of Stock'; }
+      }
+
+      const ld = document.querySelector('script[type="application/ld+json"]');
+      if (ld) {
+        try {
+          const data = JSON.parse(ld.textContent);
+          if (data && data.offers) {
+            data.offers.price = String(price);
+            if (oldPrice) data.offers.priceValidUntil = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+            if (!inStock) data.offers.availability = 'https://schema.org/OutOfStock';
+            ld.textContent = JSON.stringify(data, null, 2);
+          }
+        } catch (e) { /* ignore malformed JSON-LD */ }
+      }
+    }
+
+    document.querySelectorAll('.add-to-cart[data-product]').forEach(btn => {
+      const key = String(btn.dataset.product).toLowerCase().trim();
+      const prod = byName.get(key) || bySlug.get(key.replace(/\s+/g, '-'));
+      if (!prod) return;
+      const price = Number(prod.price) || 0;
+      const oldPrice = Number(prod.old_price) || 0;
+      const inStock = Number(prod.stock) > 0;
+      const card = btn.closest('.product-card');
+      if (card) {
+        const sale = card.querySelector('.sale');
+        if (sale) sale.textContent = fmt(price);
+        const orig = card.querySelector('.original');
+        if (orig && oldPrice) orig.textContent = fmt(oldPrice);
+      }
+      if (!inStock) {
+        btn.disabled = true;
+        btn.classList.add('disabled');
+        btn.textContent = 'Out of Stock';
+      }
+    });
+  } catch (e) { /* keep hardcoded prices if the API is unavailable */ }
+}
+syncProductData();

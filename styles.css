@@ -2157,3 +2157,15 @@ footer {
     padding: 0.35rem 0.7rem;
   }
 }
+
+.add-to-cart[disabled],
+.btn-primary[disabled],
+.btn-buy[disabled],
+.add-to-cart.disabled,
+.btn-buy.disabled {
+  background: #9e9e9e !important;
+  color: #fff !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  opacity: 0.8;
+}
