@@ -229,6 +229,32 @@ document.querySelectorAll('.size-option').forEach(opt => {
     const parent = this.closest('.size-options');
     parent.querySelectorAll('.size-option').forEach(o => o.classList.remove('active'));
     this.classList.add('active');
+    const detail = parent.closest('.detail-info');
+    if (!detail) return;
+    const fmt = n => 'Rs. ' + Number(n).toLocaleString('en-PK');
+    const sale = Number(this.dataset.sale);
+    const original = Number(this.dataset.original) || 0;
+    const saleEl = detail.querySelector('.price .sale');
+    const origEl = detail.querySelector('.price .original');
+    const badge = detail.querySelector('.discount-badge');
+    if (saleEl) saleEl.textContent = fmt(sale);
+    if (origEl) {
+      if (original > 0) {
+        origEl.textContent = fmt(original);
+        origEl.style.visibility = '';
+      } else {
+        origEl.style.visibility = 'hidden';
+      }
+    }
+    if (badge) {
+      if (original > sale) {
+        const pct = Math.round((1 - sale / original) * 100);
+        if (pct > 0) badge.textContent = pct + '% OFF';
+        badge.style.visibility = '';
+      } else {
+        badge.style.visibility = 'hidden';
+      }
+    }
   });
 });
 
@@ -506,6 +532,7 @@ async function syncProductData() {
         el.textContent = fmt(price);
       });
       document.querySelectorAll('.size-option').forEach(o => {
+        if (o.dataset.lock === '1') return;
         o.dataset.sale = String(price);
         o.dataset.original = String(oldPrice || price);
         o.dataset.stock = inStock ? 'in' : 'out';
