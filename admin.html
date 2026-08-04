@@ -759,7 +759,7 @@ async function loadReviews() {
         ? '<a href="' + esc(x.photo) + '" target="_blank" rel="noopener"><img src="' + esc(x.photo) + '" alt="photo" style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></a>'
         : '<span class="muted">-</span>';
       return '<tr>' +
-        '<td>' + esc(x.name) + '</td>' +
+        '<td>' + esc(x.name) + (x.email ? '<br><span class="muted" style="font-size:0.72rem">&#10003; ' + esc(x.email) + '</span>' : '<br><span class="muted" style="font-size:0.72rem">not verified</span>') + '</td>' +
         '<td>' + esc(x.product_name || x.slug || '-') + '<br><span class="muted" style="font-size:0.7rem">/' + esc(x.slug || '') + '</span></td>' +
         '<td><span style="color:var(--gold)">' + stars(Number(x.rating) || 0) + '</span></td>' +
         '<td style="max-width:320px">' + esc(x.review) + '</td>' +

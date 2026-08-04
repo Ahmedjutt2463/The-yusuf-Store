@@ -2309,6 +2309,15 @@ body.price-ready .price .sale {
   font-weight: 400;
   font-size: 0.72rem;
 }
+.review-google-status {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #2d8a4e;
+}
+#gSignIn {
+  margin-top: 0.25rem;
+  min-height: 40px;
+}
 .review-form-field input[type="text"],
 .review-form-field textarea {
   width: 100%;

@@ -16,6 +16,11 @@ app.use('/api/admin/sales', require('./api/admin/sales'));
 app.use('/api/admin/visits', require('./api/admin/visits'));
 app.use('/api/admin/orders', require('./api/admin/orders'));
 app.use('/api/admin/products', require('./api/admin/products'));
+app.get('/api/config', (req, res) => {
+  res.json({
+    googleClientId: process.env.GOOGLE_CLIENT_ID || null
+  });
+});
 app.use('/api/admin/reviews', require('./api/admin/reviews'));
 app.use('/api/reviews', require('./api/reviews'));
 
