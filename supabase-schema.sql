@@ -80,9 +80,7 @@ create table if not exists public.reviews (
   review text not null,
   photo text,
   approved boolean not null default true,
-  ip text,
-  email text,
-  google_sub text
+  ip text
 );
 
 create index if not exists idx_reviews_slug on public.reviews (slug, created_at desc);

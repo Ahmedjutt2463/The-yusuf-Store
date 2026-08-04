@@ -643,11 +643,6 @@ function initReviews() {
             <input type="file" id="rvPhoto" accept="image/jpeg,image/png">
             <div class="photo-preview" id="photoPreview"></div>
           </div>
-          <div class="review-form-field">
-            <label>Verify with Google <span class="review-hint">(optional, marks your review as genuine)</span></label>
-            <div id="gSignIn"></div>
-            <div class="review-google-status" id="gStatus" style="display:none"></div>
-          </div>
           <button type="submit" class="btn btn-primary" id="rvSubmit">Submit Review</button>
         </form>
       </div>
@@ -786,67 +781,6 @@ function initReviews() {
     });
   }
 
-  let googleCredential = null;
-  let googleUser = null;
-  const gSignInEl = document.getElementById('gSignIn');
-  const gStatusEl = document.getElementById('gStatus');
-
-  const decodeJwtPayload = token => {
-    try {
-      const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(decodeURIComponent(atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-    } catch (e) { return null; }
-  };
-
-  function setGStatus(html) {
-    gStatusEl.innerHTML = html;
-    gStatusEl.style.display = 'block';
-  }
-
-  function handleCredential(response) {
-    const payload = decodeJwtPayload(response.credential);
-    if (!payload || !payload.email) return;
-    googleCredential = response.credential;
-    googleUser = payload;
-    setGStatus('&#10003; Verified as <strong>' + escHtml(payload.email) + '</strong>');
-  }
-
-  function loadGis() {
-    return new Promise(resolve => {
-      if (window.google && window.google.accounts) return resolve(true);
-      const s = document.createElement('script');
-      s.src = 'https://accounts.google.com/gsi/client';
-      s.async = true;
-      s.onload = () => resolve(true);
-      s.onerror = () => resolve(false);
-      document.head.appendChild(s);
-    });
-  }
-
-  async function initGoogleSignIn() {
-    try {
-      const res = await fetch('/api/config', { cache: 'no-store' });
-      const cfg = await res.json();
-      const clientId = cfg && cfg.googleClientId;
-      if (!clientId) return;
-      const loaded = await loadGis();
-      if (!loaded) return;
-      google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleCredential,
-        cancel_on_tap_outside: false
-      });
-      google.accounts.id.renderButton(gSignInEl, {
-        type: 'standard',
-        shape: 'rectangular',
-        theme: 'outline',
-        text: 'signin_with',
-        size: 'medium',
-        width: 220
-      });
-    } catch (e) { /* Google sign-in is optional; skip silently */ }
-  }
-
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     const name = nameInput.value.trim();
@@ -865,7 +799,7 @@ function initReviews() {
       const res = await fetch('/api/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, name, rating: selectedRating, review, photo, googleCredential })
+        body: JSON.stringify({ slug, name, rating: selectedRating, review, photo })
       });
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -887,6 +821,5 @@ function initReviews() {
   });
 
   loadReviews();
-  initGoogleSignIn();
 }
 initReviews();

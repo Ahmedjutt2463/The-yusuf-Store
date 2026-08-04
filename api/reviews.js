@@ -1,7 +1,6 @@
 require('dotenv').config();
 const { getSupabase } = require('./_lib/supabase');
 const { hasOffensiveText, isPhotoSafe } = require('./_lib/moderation');
-const { verifyGoogleCredential } = require('./_lib/google');
 
 const BUCKET = 'review-photos';
 const MAX_PHOTO_BYTES = 1.5 * 1024 * 1024;
@@ -96,7 +95,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'POST') {
-      const { slug, name, rating, review, photo, googleCredential } = req.body || {};
+      const { slug, name, rating, review, photo } = req.body || {};
 
       const cleanSlug = String(slug || '').trim().toLowerCase();
       const cleanName = String(name || '').trim().slice(0, 50);
@@ -118,17 +117,6 @@ module.exports = async (req, res) => {
         return res.status(429).json({ error: 'Too many reviews. Please try again later.' });
       }
 
-      let email = null;
-      let googleSub = null;
-      if (googleCredential) {
-        const g = await verifyGoogleCredential(googleCredential, process.env.GOOGLE_CLIENT_ID);
-        if (!g) {
-          return res.status(400).json({ error: 'Google sign-in could not be verified. Please sign in with Google again and resubmit.' });
-        }
-        email = g.email || null;
-        googleSub = g.google_sub || null;
-      }
-
       let productName = '';
       try {
         const { data: prod } = await sb.from('products').select('name').eq('slug', cleanSlug).maybeSingle();
@@ -148,9 +136,7 @@ module.exports = async (req, res) => {
         review: cleanReview,
         photo: photoUrl,
         approved: true,
-        ip,
-        email,
-        google_sub: googleSub
+        ip
       }).select();
       if (error) throw error;
 
