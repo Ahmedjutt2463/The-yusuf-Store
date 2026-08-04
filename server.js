@@ -16,6 +16,8 @@ app.use('/api/admin/sales', require('./api/admin/sales'));
 app.use('/api/admin/visits', require('./api/admin/visits'));
 app.use('/api/admin/orders', require('./api/admin/orders'));
 app.use('/api/admin/products', require('./api/admin/products'));
+app.use('/api/admin/reviews', require('./api/admin/reviews'));
+app.use('/api/reviews', require('./api/reviews'));
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtpout.secureserver.net',

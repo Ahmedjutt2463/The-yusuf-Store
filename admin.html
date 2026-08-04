@@ -161,6 +161,7 @@
       <a data-view="visitors">Visitors</a>
       <a data-view="orders">Orders</a>
       <a data-view="products">Products</a>
+      <a data-view="reviews">Reviews</a>
     </nav>
     <div class="logout" onclick="logout()">Logout</div>
   </aside>
@@ -308,6 +309,25 @@
         </table>
       </div>
     </section>
+
+    <!-- REVIEWS -->
+    <section id="view-reviews" class="hidden">
+      <h1>Reviews</h1>
+      <div class="toolbar">
+        <input type="text" id="revSearch" placeholder="Search name or review..." oninput="debouncedLoadReviews()">
+        <select id="revSlug" onchange="loadReviews()">
+          <option value="all">All products</option>
+        </select>
+        <button class="btn" onclick="loadReviews()">Refresh</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Name</th><th>Product</th><th>Rating</th><th>Review</th><th>Photo</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="reviewsBody"></tbody>
+        </table>
+      </div>
+      <div class="pager" id="reviewsPager"></div>
+    </section>
   </main>
 </div>
 
@@ -354,6 +374,7 @@ function debounce(fn, ms = 400) { let t; return () => { clearTimeout(t); t = set
 const debouncedLoadVisitors = debounce(loadVisitors);
 const debouncedLoadOrders = debounce(loadOrders);
 const debouncedLoadProducts = debounce(loadProducts);
+const debouncedLoadReviews = debounce(loadReviews);
 
 async function api(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
@@ -411,6 +432,7 @@ function enterDash() {
   loadVisitors();
   loadOrders();
   loadProducts();
+  loadReviews();
 }
 
 /* ---------- NAV ---------- */
@@ -419,7 +441,7 @@ document.querySelectorAll('.sidebar nav a').forEach(a => {
     document.querySelectorAll('.sidebar nav a').forEach(x => x.classList.remove('active'));
     a.classList.add('active');
     const v = a.dataset.view;
-    ['overview', 'sales', 'visitors', 'orders', 'products'].forEach(x => {
+    ['overview', 'sales', 'visitors', 'orders', 'products', 'reviews'].forEach(x => {
       $('view-' + x).classList.toggle('hidden', x !== v);
     });
     if (v === 'overview') loadStats();
@@ -427,6 +449,7 @@ document.querySelectorAll('.sidebar nav a').forEach(a => {
     if (v === 'visitors') loadVisitors();
     if (v === 'orders') loadOrders();
     if (v === 'products') loadProducts();
+    if (v === 'reviews') loadReviews();
   });
 });
 
@@ -708,6 +731,53 @@ async function deleteProduct(id, name) {
     if (!r.success) throw new Error(r.error || 'Delete failed');
     showMsg('Product deleted');
     loadProducts();
+  } catch (err) { showMsg(err.message, false); }
+}
+
+/* ---------- REVIEWS ---------- */
+let revPage = 0;
+const REV_PAGE_SIZE = 30;
+async function loadReviews() {
+  try {
+    const params = new URLSearchParams({ limit: REV_PAGE_SIZE, offset: revPage * REV_PAGE_SIZE });
+    const q = $('revSearch').value.trim();
+    if (q) params.set('search', q);
+    const slug = $('revSlug').value;
+    if (slug && slug !== 'all') params.set('slug', slug);
+
+    const r = await api('/api/admin/reviews?' + params.toString());
+    const slugs = [...new Set((r.data || []).map(x => x.slug).filter(Boolean))];
+    const slugSel = $('revSlug');
+    if (!slug || slugSel.options.length <= 1) {
+      const cats = slugs;
+      slugSel.innerHTML = '<option value="all">All products</option>' + cats.map(s => '<option value="' + esc(s) + '"' + (s === slug ? ' selected' : '') + '>' + esc(s) + '</option>').join('');
+    }
+    const stars = n => '&#9733;'.repeat(Math.max(0, Math.min(5, n))) + '&#9734;'.repeat(Math.max(0, 5 - n));
+
+    $('reviewsBody').innerHTML = (r.data || []).map(x => {
+      const photo = x.photo
+        ? '<a href="' + esc(x.photo) + '" target="_blank" rel="noopener"><img src="' + esc(x.photo) + '" alt="photo" style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></a>'
+        : '<span class="muted">-</span>';
+      return '<tr>' +
+        '<td>' + esc(x.name) + '</td>' +
+        '<td>' + esc(x.product_name || x.slug || '-') + '<br><span class="muted" style="font-size:0.7rem">/' + esc(x.slug || '') + '</span></td>' +
+        '<td><span style="color:var(--gold)">' + stars(Number(x.rating) || 0) + '</span></td>' +
+        '<td style="max-width:320px">' + esc(x.review) + '</td>' +
+        '<td>' + photo + '</td>' +
+        '<td>' + fmtDate(x.created_at) + '</td>' +
+        '<td><button class="btn sm danger" onclick="deleteReview(\'' + x.id + '\', \'' + esc(x.name).replace(/'/g, "\\'") + '\')">Delete</button></td>' +
+        '</tr>';
+    }).join('') || '<tr><td colspan="7" class="muted">No reviews found.</td></tr>';
+    renderPager($('reviewsPager'), r.total, revPage, p => { revPage = p; loadReviews(); });
+  } catch (err) { showMsg(err.message, false); }
+}
+async function deleteReview(id, name) {
+  if (!confirm('Delete review by "' + name + '"? This cannot be undone.')) return;
+  try {
+    const r = await api('/api/admin/reviews?id=' + id, { method: 'DELETE' });
+    if (!r.success) throw new Error(r.error || 'Delete failed');
+    showMsg('Review deleted');
+    loadReviews();
   } catch (err) { showMsg(err.message, false); }
 }
 

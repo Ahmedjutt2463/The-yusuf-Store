@@ -597,3 +597,229 @@ async function syncProductData() {
 }
 syncProductData();
 setTimeout(() => document.body.classList.add('price-ready'), 6000);
+
+/* ---------- REVIEWS ---------- */
+function initReviews() {
+  const detailSection = document.querySelector('.product-detail');
+  if (!detailSection) return;
+
+  const slug = (location.pathname.split('/').pop().replace('.html', '') || 'product').toLowerCase();
+  const escHtml = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  detailSection.insertAdjacentHTML('afterend', `
+    <section class="reviews-section" id="reviewsSection">
+      <div class="reviews-container">
+        <div class="reviews-head">
+          <h2>Customer Reviews</h2>
+          <div class="reviews-summary" id="reviewsSummary">Loading reviews...</div>
+        </div>
+        <div class="reviews-list" id="reviewsList"></div>
+        <form class="review-form" id="reviewForm" novalidate>
+          <h3>Write a Review</h3>
+          <div class="review-form-row">
+            <div class="review-form-field">
+              <label for="rvName">Your Name *</label>
+              <input type="text" id="rvName" maxlength="50" placeholder="e.g. Ahmed" required>
+            </div>
+            <div class="review-form-field">
+              <label>Rating *</label>
+              <div class="rating-input" id="ratingInput">
+                <span class="rate-star" data-v="1" title="1 star">&star;</span>
+                <span class="rate-star" data-v="2" title="2 stars">&star;</span>
+                <span class="rate-star" data-v="3" title="3 stars">&star;</span>
+                <span class="rate-star" data-v="4" title="4 stars">&star;</span>
+                <span class="rate-star" data-v="5" title="5 stars">&star;</span>
+              </div>
+            </div>
+          </div>
+          <div class="review-form-field">
+            <label for="rvText">Your Review *</label>
+            <textarea id="rvText" rows="4" maxlength="1000" placeholder="Share your experience with this product..." required></textarea>
+          </div>
+          <div class="review-form-field">
+            <label>Add a photo <span class="review-hint">(optional, JPG or PNG, max 1)</span></label>
+            <input type="file" id="rvPhoto" accept="image/jpeg,image/png">
+            <div class="photo-preview" id="photoPreview"></div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="rvSubmit">Submit Review</button>
+        </form>
+      </div>
+    </section>
+  `);
+
+  const listEl = document.getElementById('reviewsList');
+  const summaryEl = document.getElementById('reviewsSummary');
+  const form = document.getElementById('reviewForm');
+  const nameInput = document.getElementById('rvName');
+  const textInput = document.getElementById('rvText');
+  const submitBtn = document.getElementById('rvSubmit');
+  const photoInput = document.getElementById('rvPhoto');
+  const previewEl = document.getElementById('photoPreview');
+  const starEls = Array.from(document.querySelectorAll('#ratingInput .rate-star'));
+  let selectedRating = 0;
+
+  const starsHtml = n => {
+    const filled = '&#9733;'.repeat(Math.max(0, Math.min(5, n)));
+    const empty = '&#9734;'.repeat(Math.max(0, 5 - n));
+    return filled + empty;
+  };
+
+  const fmtDate = iso => {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch (e) { return ''; }
+  };
+
+  function renderReview(r) {
+    return `
+      <div class="review-card">
+        <div class="review-top">
+          <span class="review-name">${escHtml(r.name)}</span>
+          <span class="review-date">${fmtDate(r.created_at)}</span>
+        </div>
+        <div class="review-stars">${starsHtml(Number(r.rating) || 0)}</div>
+        <p class="review-text">${escHtml(r.review).replace(/\n/g, '<br>')}</p>
+        ${r.photo ? `<a class="review-photo-link" href="${escHtml(r.photo)}" target="_blank" rel="noopener nofollow" title="View photo"><img src="${escHtml(r.photo)}" alt="Review photo" loading="lazy"></a>` : ''}
+      </div>`;
+  }
+
+  function renderAll(reviews) {
+    if (!reviews.length) {
+      listEl.innerHTML = '<p class="reviews-empty">No reviews yet. Be the first to write one!</p>';
+      summaryEl.textContent = 'Be the first to review this product';
+      return;
+    }
+    listEl.innerHTML = reviews.map(renderReview).join('');
+    const avg = reviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / reviews.length;
+    const avgTxt = avg.toFixed(1).replace(/\.0$/, '');
+    summaryEl.innerHTML = `${starsHtml(Math.round(avg))} <strong>${avgTxt}</strong> &middot; ${reviews.length} review${reviews.length === 1 ? '' : 's'}`;
+  }
+
+  async function loadReviews() {
+    try {
+      const res = await fetch('/api/reviews?slug=' + encodeURIComponent(slug), { cache: 'no-store' });
+      const payload = await res.json();
+      renderAll(Array.isArray(payload.data) ? payload.data : []);
+    } catch (e) {
+      summaryEl.textContent = 'Reviews could not be loaded.';
+    }
+  }
+
+  starEls.forEach(star => {
+    const setHover = n => starEls.forEach(s => s.classList.toggle('hover', Number(s.dataset.v) <= n));
+    star.addEventListener('mouseenter', () => setHover(Number(star.dataset.v)));
+    star.addEventListener('mouseleave', () => starEls.forEach(s => s.classList.remove('hover')));
+    star.addEventListener('click', () => {
+      selectedRating = Number(star.dataset.v);
+      starEls.forEach(s => s.classList.toggle('active', Number(s.dataset.v) <= selectedRating));
+    });
+  });
+
+  let pickedPhoto = null;
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files && photoInput.files[0];
+    if (!file) { pickedPhoto = null; previewEl.innerHTML = ''; return; }
+    if (!/^image\/(jpeg|png)$/i.test(file.type)) {
+      showToast('Please choose a JPG or PNG photo.');
+      photoInput.value = '';
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('Photo is too large. Please choose a smaller one (max 8MB).');
+      photoInput.value = '';
+      return;
+    }
+    pickedPhoto = file;
+    previewEl.innerHTML = `<div class="photo-preview-item">
+      <img src="${URL.createObjectURL(file)}" alt="Selected photo">
+      <button type="button" class="photo-remove" title="Remove photo">&times;</button>
+    </div>`;
+    previewEl.querySelector('.photo-remove').addEventListener('click', () => {
+      pickedPhoto = null;
+      photoInput.value = '';
+      previewEl.innerHTML = '';
+    });
+  });
+
+  function compressImage(file, maxDim, maxBytes) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Could not read the photo.'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('Could not read that photo. Please use a JPG or PNG.'));
+        img.onload = () => {
+          try {
+            let width = img.width, height = img.height;
+            const scale = Math.min(1, maxDim / Math.max(width, height));
+            width = Math.max(1, Math.round(width * scale));
+            height = Math.max(1, Math.round(height * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            let quality = 0.82;
+            let dataUrl = canvas.toDataURL('image/jpeg', quality);
+            while (dataUrl.length > maxBytes * 1.34 && quality > 0.4) {
+              quality -= 0.15;
+              dataUrl = canvas.toDataURL('image/jpeg', quality);
+            }
+            resolve(dataUrl);
+          } catch (e) {
+            reject(new Error('Could not process that photo.'));
+          }
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const name = nameInput.value.trim();
+    const review = textInput.value.trim();
+    if (!name) { showToast('Please enter your name.'); return; }
+    if (!selectedRating) { showToast('Please select a star rating.'); return; }
+    if (!review) { showToast('Please write your review.'); return; }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+    try {
+      let photo = null;
+      if (pickedPhoto) {
+        photo = await compressImage(pickedPhoto, 1000, 1300000);
+      }
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, name, rating: selectedRating, review, photo })
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(payload.error || 'Review could not be submitted. Please try again.');
+      }
+      form.reset();
+      selectedRating = 0;
+      starEls.forEach(s => s.classList.remove('active'));
+      pickedPhoto = null;
+      previewEl.innerHTML = '';
+      showToast('Thank you! Your review has been published.');
+      loadReviews();
+    } catch (err) {
+      showToast(err.message || 'Review could not be submitted.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Review';
+    }
+  });
+
+  loadReviews();
+}
+initReviews();

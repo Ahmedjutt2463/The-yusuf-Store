@@ -21,11 +21,15 @@
   "homepage": "https://github.com/Ahmedjutt2463/The-yusuf-Store#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.111.0",
+    "@tensorflow/tfjs": "^4.22.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jpeg-js": "^0.4.4",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^9.0.3",
+    "nsfwjs": "^4.3.0",
+    "pngjs": "^7.0.0",
     "twilio": "^6.0.2"
   }
 }

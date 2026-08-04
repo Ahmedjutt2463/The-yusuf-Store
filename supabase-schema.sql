@@ -69,6 +69,26 @@ create table if not exists public.products (
 create index if not exists idx_products_category on public.products (category);
 create index if not exists idx_products_active on public.products (active);
 
+-- ---------- REVIEWS (visitor reviews on product pages) ----------
+create table if not exists public.reviews (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  slug text not null,
+  product_name text,
+  name text not null,
+  rating integer not null default 5 check (rating >= 1 and rating <= 5),
+  review text not null,
+  photo text,
+  approved boolean not null default true,
+  ip text
+);
+
+create index if not exists idx_reviews_slug on public.reviews (slug, created_at desc);
+create index if not exists idx_reviews_created on public.reviews (created_at desc);
+
+-- Storage bucket "review-photos" (public) is created automatically by the
+-- API on the first photo upload. No manual setup needed.
+
 -- ---------- SECURITY ----------
 -- Row Level Security ON. The server uses the service_role key,
 -- which automatically bypasses RLS, so the anon key cannot read
@@ -76,3 +96,4 @@ create index if not exists idx_products_active on public.products (active);
 alter table public.visits enable row level security;
 alter table public.orders enable row level security;
 alter table public.products enable row level security;
+alter table public.reviews enable row level security;
